@@ -1,0 +1,143 @@
+library(randomForest)
+library(grid)
+library(MVT)
+library(mvtnorm)
+library(party)
+library(rpart)
+library(RColorBrewer)
+library(basetheme)
+
+library(gtools)
+library(rpart.plot)
+library(ranger)
+library(lattice)
+library(caret)
+library(RColorBrewer)
+
+library(ape)
+library(treebase)
+library(ggplot2movies)
+setwd("F://INTRUSION")
+dataset<-read.csv("Train_data.csv",header = T)
+View(dataset)
+dim(dataset)
+str(dataset)
+shuffle_index <- sample(1:nrow(dataset))
+dataset <- dataset[shuffle_index,]
+head(dataset)
+	
+install.packages("rpart.plot")	
+install.packages("rpart")
+install.packages("multcomp")
+install.packages("rsq")
+
+#### random Forest
+# split the data into training and testing sets
+ind<-sample(2,nrow(dataset),replace = T,prob = c(.9,.1))
+train_data<-dataset[ind==1,]
+test_data<-dataset[ind==2,]
+dim(train_data)
+prop.table(table(train_data$xAttack))
+install.packages("rpart")
+
+## random forest for regression ## with all the variable
+set.seed(1001)
+random_dataset<-randomForest(xAttack~.,data=dataset,mtry=3,ntree=250)
+print(random_dataset)
+	
+## prediction on test data set
+pred_dataset<-predict(random_dataset,test_data)
+	
+##random forest with confirm variable
+set.seed(1001)
+	
+install.packages("rpart")
+
+fit <-rpart(xAttack~.,data=train_data,method = "class")
+plot(xAttack~duration,data=train_data)
+plot(train_data$duration,train_data$xAttack)
+box(train_data$duration)
+par(las=1)
+plot(c(1,2),train_data$xAttack,type="1",xlab = "duration",ylab = "xAttack",lty=2,lwd=3,col="red")
+
+# We will use the ctree() function to create the decision tree and see its graph.
+# Load the party package. It will automatically load other
+# dependent packages.
+library(rpart)
+#  Create the input data frame.
+Train_data.csv <- xAttack[c(1:105),]
+
+# S3 method for BinaryTree
+plot(xAttack, main = NULL, type = c("extended", "simple"),terminal_panel = NULL, tp_args = list(),inner_panel = node_inner, ip_args = list(),edge_panel = edge_simple, ep_args = list(),drop_terminal = (type[1] == "extended"),tnex = (type[1] == "extended") + 1, newpage = TRUE,pop = TRUE)           
+	
+# display the results
+printcp(fit)
+	
+# visualize cross-validation results
+plotcp(fit)
+
+# detailed summary of splits
+summary(fit)
+	
+# plot tree
+plot(fit, uniform=TRUE,main="Regression Tree ")
+text(fit, use.n=TRUE, all=TRUE, cex=.8)
+
+# create attractive postscript plot of tree
+post(fit, file = "F:/Train_data.csv",title = "Classification Tree")
+post(fit, file = "train_data",title = "Classification Tree")
+
+# prune the tree
+pfit<- prune(fit, cp= fit$cptable[which.min(fit$cptable[,"xAttack"]),"CP"])
+	
+# grow tree
+fit <- rpart(xAttack~duration + protocol_type + count + hot,method="anova", data=train_data)
+
+# display the results
+printcp(fit)
+
+# visualize cross-validation results
+plotcp(fit)
+
+# detailed summary of splits
+summary(fit)
+
+# create additional plots
+# visualize cross-validation results
+plotcp(fit)
+
+# detailed summary of splits
+summary(fit)
+
+# create additional plots
+# two plots on one page
+par(mfrow=c(1,2))
+
+# visualize cross-validation results  
+rsq.rpart(fit)
+
+# plot tree
+plot(fit, uniform=TRUE,main="Regression Tree ")
+text(fit, use.n=TRUE, all=TRUE, cex=.8)
+
+# create attractive postcript plot of tree
+post(fit, file = "F:/Train_data.csv",title = "Regression Tree ")
+post(fit, file = "train_data",title = "Regression Tree ")
+
+# prune the tree
+# from cptable
+pfit<- prune(fit, cp=0.01160389)
+
+# plot the pruned tree
+plot(pfit, uniform=TRUE,main="Pruned Regression Tree")     
+
+text(pfit, use.n=TRUE, all=TRUE, cex=.8)
+post(pfit, file = "F:/Train_data.csv",title = "Pruned Regression Tree")     
+post(pfit, file = "train_data",title = "Pruned Regression Tree")
+
+# Random Forest prediction of data
+library(randomForest)
+fit <- randomForest(xAttack ~ protocol_type + count + duration,   data=train_data)
+
+# view results
+print(fit)
